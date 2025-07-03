@@ -25,6 +25,18 @@ services:
       - ../project:/usr/src/app
       - /usr/src/app/node_modules
     ports:
+      - "8000:3000"
+    networks:
+      - shared-net
+  
+  frontend:
+    restart: always
+    container_name: frontend
+    build: ../frontend
+    volumes:
+      - ../frontend:/app
+      - /usr/src/app/node_modules
+    ports:
       - "3000:3000"
     networks:
       - shared-net
