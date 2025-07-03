@@ -10,4 +10,13 @@ export class CreateUserDto {
     @IsString()
     @MinLength(4)
     username: string
+
+    @IsString()
+    @IsNotEmpty()
+    role:string;
+
+    @IsString()
+    @IsNotEmpty()
+    status:string;
+
 }

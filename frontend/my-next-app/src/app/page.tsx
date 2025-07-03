@@ -49,12 +49,12 @@ import {
 } from "@/components/ui/sidebar"
 
 interface User {
-  id: string
+  id?: string
   username: string
   email: string
   role: string
   status: "active" | "inactive"
-  createdAt: string
+  createdAt?: string
 }
 
 const initialUsers: User[] = [
@@ -160,18 +160,16 @@ export default function Dashboard() {
 
   const  handleAddUser = () => {
     const newUser: User = {
-      id: Date.now().toString(),
       username: formData.username,
       email: formData.email,
       role: formData.role,
       status: formData.status,
-      createdAt: new Date().toISOString().split("T")[0],
     }
     const data = {
       username: newUser.username,
       email:newUser.email
     }
-    axios.post('http://localhost:8000/users/', data)
+    axios.post('http://localhost:8000/users/', newUser)
       .then((response) => {
           console.log(response)
           setUsers([...users, response.data])
@@ -188,10 +186,23 @@ export default function Dashboard() {
     if (!selectedUser) return
 
     const updatedUsers = users.map((user) => (user.id === selectedUser.id ? { ...user, ...formData } : user))
-    setUsers(updatedUsers)
-    setFormData({ username: "", email: "", role: "", status: "active" })
-    setSelectedUser(null)
-    setIsEditDialogOpen(false)
+    axios.patch(`http://localhost:8000/users/${selectedUser.id}`, formData).then((res)=>{
+      console.log("res", res.data)
+      const updatedUser = res.data;
+
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user.id === updatedUser.id ? updatedUser : user
+        )
+      );
+      toast.success(`${selectedUser.username} => ${res.data.username}`)
+      setFormData({ username: "", email: "", role: "", status: "active" })
+      setSelectedUser(null)
+      setIsEditDialogOpen(false)
+
+    }).catch((err) => {
+      toast.error(err.response.data.message[0])
+    })
   }
 
   const handleDeleteUser = () => {
